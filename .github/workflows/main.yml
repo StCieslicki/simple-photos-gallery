@@ -1,0 +1,37 @@
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deployment_job:
+    runs-on: ubuntu-latest
+    name: ssh push
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - run: mkdir -p "/home/runner/work/simple-photos-gallery/simple-photos-gallery/package"
+      - run: cp -r "/home/runner/work/simple-photos-gallery/simple-photos-gallery/src" "/home/runner/work/simple-photos-gallery/simple-photos-gallery/package/"
+      - run: cp -r "/home/runner/work/simple-photos-gallery/simple-photos-gallery/public" "/home/runner/work/simple-photos-gallery/simple-photos-gallery/package/"
+      - run: cp "/home/runner/work/simple-photos-gallery/simple-photos-gallery/package.json" "/home/runner/work/simple-photos-gallery/simple-photos-gallery/package/"
+      - run: cp "/home/runner/work/simple-photos-gallery/simple-photos-gallery/package-lock.json" "/home/runner/work/simple-photos-gallery/simple-photos-gallery/package/"
+      - run: cp "/home/runner/work/simple-photos-gallery/simple-photos-gallery/Dockerfile" "/home/runner/work/simple-photos-gallery/simple-photos-gallery/package/"
+      - run: cp "/home/runner/work/simple-photos-gallery/simple-photos-gallery/.dockerignore" "/home/runner/work/simple-photos-gallery/simple-photos-gallery/package/"
+      - run: cp "/home/runner/work/simple-photos-gallery/simple-photos-gallery/compose.yaml" "/home/runner/work/simple-photos-gallery/simple-photos-gallery/package/"
+      - run: cp "/home/runner/work/simple-photos-gallery/simple-photos-gallery/tsconfig.json" "/home/runner/work/simple-photos-gallery/simple-photos-gallery/package/"
+      - run: cp "/home/runner/work/simple-photos-gallery/simple-photos-gallery/tslint.json" "/home/runner/work/simple-photos-gallery/simple-photos-gallery/package/"
+
+      - name: SSH push
+        uses: ErenKrt/ssh-push@main
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          password: ${{secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          source: "/home/runner/work/simple-photos-gallery/simple-photos-gallery/package"
+          destination: "/home/pi/workspace/simple-photos-gallery/web.zip"
+          scripts: unzip -o /home/pi/workspace/simple-photos-gallery/web.zip -d /home/pi/workspace/simple-photos-gallery/ && rm /home/pi/workspace/simple-photos-gallery/web.zip && cd /home/pi/workspace/simple-photos-gallery/ && docker compose up -d --build
