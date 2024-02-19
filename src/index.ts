@@ -11,7 +11,7 @@ app.use(cache('1 day'));
 console.log(__dirname);
 app.use(express.static(__dirname + '/../public'));
 
-const port = 3333;
+const port = 3000;
 
 app.use('/', express.static(__dirname + '/../public', {index: "index.html"}));
 
